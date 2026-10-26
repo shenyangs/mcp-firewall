@@ -1,0 +1,86 @@
+{
+  "project": "mcp-firewall",
+  "state": "PASS",
+  "scenario": "Official MCP SDK stdio client reads fixture, denied write preserves SHA-256, policy override permits write, fixture restored; React displays actual events.",
+  "checks": [
+    {
+      "id": "build",
+      "passed": true,
+      "evidence": "artifacts/logs/build.log"
+    },
+    {
+      "id": "mcp-integration",
+      "passed": true,
+      "evidence": "artifacts/logs/test.log"
+    },
+    {
+      "id": "browser-e2e-2-tests",
+      "passed": true,
+      "evidence": "artifacts/logs/e2e.log"
+    },
+    {
+      "id": "demo-recording",
+      "passed": true,
+      "evidence": "artifacts/playwright/demo-real-MCP-policy-gate--7b124-ssion-flip-allowed-mutation/video.webm"
+    },
+    {
+      "id": "denied-hash-unchanged",
+      "passed": true,
+      "evidence": "artifacts/denied-write.png"
+    },
+    {
+      "id": "allowed-write-changed",
+      "passed": true,
+      "evidence": "artifacts/allowed-write.png"
+    },
+    {
+      "id": "standalone-sdk-client",
+      "passed": true,
+      "evidence": "artifacts/logs/mcp-demo.log"
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "npm run build (initial SDK signature error; corrected)",
+      "exitCode": 2
+    },
+    {
+      "cmd": "npm run e2e (initial missing browser / FFmpeg; resolved)",
+      "exitCode": 1
+    },
+    {
+      "cmd": "npm run browsers:install (optional full-browser download stopped; cached executable used)",
+      "exitCode": 143
+    },
+    {
+      "cmd": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run test",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run e2e (PLAYWRIGHT_EXECUTABLE_PATH set to existing compatible Chromium)",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run demo (PLAYWRIGHT_EXECUTABLE_PATH set to existing compatible Chromium)",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run mcp:demo",
+      "exitCode": 0
+    }
+  ],
+  "liveModel": false,
+  "fixturesUsed": true,
+  "demoVideo": "artifacts/playwright/demo-real-MCP-policy-gate--7b124-ssion-flip-allowed-mutation/video.webm",
+  "limitations": [
+    "Controlled two-tool gateway, not a universal MCP interceptor.",
+    "No inference: real deterministic enforcement on explicitly labelled fixture data.",
+    "Single-operator mutable audit; last 100 events; no cross-process locking or tamper resistance.",
+    "Browser verification reused an existing Chromium executable read-only and downloaded matching FFmpeg into project cache. Fresh-clone headless browser installation was not verified; an earlier slow full-browser download was stopped.",
+    "No OS sandbox or authentication; hostile local processes and filesystem races are out of scope."
+  ]
+}

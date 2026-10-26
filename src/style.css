@@ -1,1 +1,352 @@
-*{box-sizing:border-box}body{margin:0;background:#070c17;color:#e5edff;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.container{max-width:1300px;margin:0 auto;padding:60px}.eyebrow{font-size:12px;color:#63d2e1;letter-spacing:.15em;text-transform:uppercase}h1{font-size:clamp(42px,7vw,92px);letter-spacing:-.06em;margin:16px 0}.muted{color:#9ba9c0}button{cursor:pointer}
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #e5e9ee;
+  background: #0c1015;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+main {
+  max-width: 1500px;
+  margin: auto;
+  padding: 28px 48px;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #26313a;
+  padding-bottom: 23px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: 2px;
+  font-size: 17px;
+}
+.brand svg {
+  color: #b5ed8c;
+}
+.brand b {
+  font-weight: 450;
+  color: #85939e;
+}
+.tag,
+.fixture {
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  color: #97a6b3;
+}
+.tag {
+  border: 1px solid #303b46;
+  padding: 6px 9px;
+  border-radius: 4px;
+}
+.fixture {
+  margin-left: auto;
+  color: #c4d3df;
+}
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 38px 0 30px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 2.8px;
+  color: #a5d87e;
+}
+h1 {
+  font-size: 49px;
+  letter-spacing: -2px;
+  line-height: 1.08;
+  margin: 15px 0;
+}
+em {
+  font-style: normal;
+  color: #b5ed8c;
+}
+p {
+  color: #8d9ca9;
+  line-height: 1.7;
+  font-size: 13px;
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  width: 260px;
+  gap: 30px;
+}
+.stats div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100px;
+}
+.stats strong {
+  font-size: 57px;
+  font-weight: 400;
+  color: #b5ed8c;
+}
+.stats span {
+  color: #a3b0bc;
+  font-size: 13px;
+}
+.stats small {
+  font-size: 10px;
+  color: #667581;
+}
+.stats .red {
+  color: #ff8e87;
+}
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  border: 1px solid #29333e;
+  background: #141b22;
+  padding: 17px 20px;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  border-radius: 7px;
+}
+.right {
+  margin-left: auto;
+}
+.accent {
+  color: #b5ed8c;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+aside,
+article {
+  border: 1px solid #29333e;
+  border-radius: 8px;
+  padding: 22px;
+  background: #10161d;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin-bottom: 18px;
+}
+.policy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid #26303a;
+}
+b {
+  font-size: 12px;
+  font-weight: 550;
+}
+small {
+  display: block;
+  color: #7f909e;
+  font-size: 11px;
+  margin-top: 6px;
+}
+.badge {
+  font-size: 10px;
+  letter-spacing: 0.6px;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+.allowed {
+  color: #b5ed8c;
+  background: #223326;
+}
+.denied {
+  color: #ffa49b;
+  background: #3a2427;
+}
+.toggle {
+  width: 39px;
+  height: 23px;
+  border: 1px solid #4e5965;
+  border-radius: 20px;
+  background: #28333d;
+  padding: 3px;
+}
+.toggle i {
+  display: block;
+  width: 15px;
+  height: 15px;
+  background: #b3bec6;
+  border-radius: 50%;
+}
+.toggle.on {
+  background: #b5ed8c;
+}
+.toggle.on i {
+  transform: translateX(15px);
+  background: #20321c;
+}
+.boundary {
+  font-size: 10px;
+  margin: 16px 0 24px;
+}
+.action {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 13px;
+  margin: 9px 0;
+  border: 1px solid #394653;
+  border-radius: 5px;
+  background: #1a242e;
+  color: #e1e9ef;
+  font-size: 12px;
+}
+.primary {
+  background: #b5ed8c;
+  border-color: #b5ed8c;
+  color: #15220e;
+  font-weight: 650;
+}
+.restore {
+  border: 0;
+  background: none;
+  color: #8f9da9;
+  font-size: 10px;
+  margin-top: 9px;
+  padding: 3px;
+}
+.activity {
+  height: 209px;
+  overflow: auto;
+}
+.empty {
+  text-align: center;
+  padding: 60px;
+  color: #a1b0ba;
+  font-size: 13px;
+}
+.event {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  border-bottom: 1px solid #26303a;
+  padding: 14px 0;
+}
+.event time {
+  margin-left: auto;
+  color: #6f8190;
+  font: 10px monospace;
+}
+.proof {
+  background: #0c1117;
+  border: 1px solid #28333e;
+  padding: 16px;
+  border-radius: 5px;
+  margin-top: 18px;
+}
+.proof .section-title {
+  font-size: 10px;
+}
+.hash {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 9px;
+}
+.hash span {
+  font-size: 9px;
+  color: #718594;
+  width: 38px;
+}
+.hash code {
+  font-size: 10px;
+  color: #a9bac8;
+  overflow-wrap: anywhere;
+}
+details {
+  font-size: 11px;
+  color: #8c9ba7;
+  margin-top: 14px;
+}
+pre {
+  white-space: pre-wrap;
+  max-height: 150px;
+  overflow: auto;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  color: #667784;
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  padding: 24px 0;
+}
+[role="alert"] {
+  color: #ff9f93;
+}
+@media (max-width: 900px) {
+  main {
+    padding: 20px;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .hero h1 {
+    font-size: 36px;
+  }
+  .fixture,
+  .pipeline .right {
+    display: none;
+  }
+  .stats {
+    width: 180px;
+    gap: 10px;
+  }
+  .stats div {
+    width: 70px;
+  }
+  .hash code {
+    font-size: 9px;
+  }
+  footer {
+    gap: 20px;
+  }
+}
+/* Keep the complete policy demonstration in a 1440 × 810 viewport. */
+@media (min-width: 901px) {
+  main { padding-top: 20px; padding-bottom: 12px; }
+  header { padding-bottom: 16px; }
+  .hero { padding: 24px 0 18px; }
+  h1 { font-size: 43px; margin: 12px 0; }
+  .hero p { margin-bottom: 0; }
+  .grid { margin-top: 16px; gap: 20px; }
+  aside, article { padding: 18px; }
+  .section-title { margin-bottom: 12px; }
+  .policy { padding: 12px 0; }
+  .boundary { margin: 12px 0 18px; }
+  .activity { height: 175px; }
+  .event { padding: 11px 0; }
+  .proof { margin-top: 12px; padding: 13px; }
+  footer { padding: 16px 0; }
+}

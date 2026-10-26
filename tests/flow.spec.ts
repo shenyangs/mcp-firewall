@@ -1,3 +1,22 @@
-import {test, expect} from '@playwright/test';
-// TEMPLATE_TEST_REPLACE: Agent must replace with domain-specific real-world assertion before PASS.
-test('starter page renders', async ({page}) => { await page.goto('/'); await expect(page.getByRole('heading', {name:'mcp-firewall'})).toBeVisible(); });
+import { test, expect } from "@playwright/test";
+test("API rejects invalid requests and cross-origin writes", async ({
+  request,
+}) => {
+  expect((await request.get("/api/health")).ok()).toBe(true);
+  expect(
+    (
+      await request.post("/api/policy", { data: { allowWrites: "yes" } })
+    ).status(),
+  ).toBe(400);
+  expect(
+    (await request.post("/api/invoke", { data: { tool: "shell" } })).status(),
+  ).toBe(400);
+  expect(
+    (
+      await request.post("/api/policy", {
+        headers: { Origin: "https://example.com" },
+        data: { allowWrites: true },
+      })
+    ).status(),
+  ).toBe(403);
+});
