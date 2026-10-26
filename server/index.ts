@@ -64,12 +64,14 @@ app.post("/api/invoke", async (req, res) => {
   busy = true;
   try {
     const before = hash();
+    const previousEvent = events().at(-1)?.timestamp;
     const result = await invoke(
       data.data.tool,
       allowWrites,
       data.data.text ?? "本地操作者已批准此次示例更新。\n",
     );
-    res.json({ result, before, after: hash() });
+    const latestEvent = events().at(-1);
+    res.json({ result, before, after: hash(), event: latestEvent?.timestamp !== previousEvent ? latestEvent : null });
     broadcast();
   } catch {
     res.status(500).json({ error: "MCP 调用失败，请检查本地服务后重试" });

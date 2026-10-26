@@ -1,111 +1,92 @@
-# MCP Firewall · 工具权限防火墙
+# MCP Firewall
 
-**智能体请求写文件，防火墙在执行前拦住它。** 本项目通过官方 MCP TypeScript SDK v2，真实启动 stdio 工具进程，展示读取、拒绝写入、手动授权写入及文件哈希证据。
+给正在接入 MCP 工具的开发者：在本地试一次读写，看看写入权限关闭时请求在哪里被拦住，开启后文件是否真的改变。
 
-这是固定两个工具的受控网关，**不是所有 MCP 客户端的通用拦截器**。默认使用明确标注的示例数据（fixture），真实执行工具与权限判断，**不调用模型、不需要任何 API Key**。
+![请求审查台：左侧为真实调用记录，右侧显示已授权写入的规则、载荷和文件哈希](docs/images/request-overview.png)
 
-## 环境与安装
+界面中的记录来自官方 MCP SDK 启动的 stdio 工具进程。没有模型、账号或 API Key；操作对象是仓库内的一份示例笔记。
 
-需要 Node.js **22.12+（22 系列）、24.x 或 26+**（匹配锁定的 Vitest 5 要求，推荐 24 LTS）、npm，以及首次安装时的网络连接。依赖和版本由 `package-lock.json` 固定。请在本仓库根目录操作；无父目录或其他项目依赖。
+## 启动
 
-macOS、Windows PowerShell、Linux 均可运行以下命令：
-
-```sh
-npm run setup
-npm run doctor
-npm run dev
-```
-
-`setup` 使用 Node 跨平台脚本，先运行 `npm ci --cache .npm-cache`，再安装 Chromium 无头浏览器与 FFmpeg 录像组件。依赖、缓存、下载及临时文件都留在项目目录，不安装系统软件、不修改机器配置。安装会访问 npm/Playwright 下载服务，浏览器下载可能较大。
-
-如果只想运行界面，可先安装依赖，跳过仅测试所需的浏览器：
+需要 Node.js **22.12+（22 系列）、24.x 或 26+**，以及 npm。进入本项目目录执行：
 
 ```sh
 npm ci --cache .npm-cache
 npm run dev
 ```
 
-需要测试时补装：`npm run browsers:install`。该命令与 setup 使用同一个安装脚本。Linux 若缺少浏览器系统库，需自行按 Playwright 对应发行版说明安装；本项目不会自动执行系统级安装。Windows 若 PowerShell 阻止 `npm.ps1`，使用 `npm.cmd` 替代命令中的 `npm`，无需更改系统执行策略。
+打开 [本地审查台](http://127.0.0.1:4205)。前端使用 4205 端口，API 使用 5205；两者只监听 `127.0.0.1`。停止服务时在终端按 Ctrl+C。
 
-启动后打开 **http://127.0.0.1:4205**；健康检查为 **http://127.0.0.1:5205/api/health**。这两个地址都只绑定本机回环地址。请使用 `127.0.0.1`，避免 localhost 在某些系统解析为 IPv6 导致无法访问。终端会打印中文入口。
+想连浏览器测试环境一起安装，可用 `npm run setup` 替代第一条命令。它安装锁定的 npm 依赖、Chromium 无头浏览器和 FFmpeg；下载缓存与临时文件都放在项目目录。首次安装需要联网，浏览器下载较大。
 
-## 主要依赖做什么
+Windows PowerShell 如果阻止 `npm.ps1`，请改用 `npm.cmd`。Linux 上的 Chromium 可能还需要系统库；脚本不会自动安装系统软件。
 
-| 依赖 | 作用 |
-| --- | --- |
-| React / React DOM 19.3.1 | 中文交互界面、权限开关和事件显示 |
-| Vite 8.3.5 / React 插件 6.1.2 | 本地前端服务、API 代理和生产构建 |
-| Express 5.3.0 | 本地 API、输入限制与 SSE 状态推送 |
-| MCP server / client 2.4.0 | 官方 stdio 服务端和真实工具发现、调用 |
-| Zod 4.6.7 | 校验工具和 API 参数，拒绝额外路径字段 |
-| TypeScript 7.0.2 / tsx 4.23.15 | 类型检查和运行服务端 TypeScript |
-| Vitest 5.0.5 | MCP 集成测试与 doctor 缺依赖诊断测试 |
-| Playwright 1.64.1 | Chromium 浏览器断言、中文截图和真实录像 |
-| concurrently 10.0.6 | 同时启动前端和 API，结束时清理子进程 |
-| lucide-react 1.61.0 | 界面图标 |
+## 试一次被拒绝的写入
 
-`@types/*` 只提供开发时类型声明；Chromium 与 FFmpeg 仅用于浏览器验收和录像。无云服务、数据库、模型、账号或付费依赖。
+1. 点击“读取笔记”，确认出现一条已执行的读取记录。
+2. 保持写入开关关闭，点击“尝试写入”。选中这条请求，可以看到拒绝规则、未执行标记，以及相同的前后哈希。
+3. 开启“允许写入”，再次尝试。文件会被更新，详情显示“已改变”。可展开“编辑写入内容”修改示例文字。
+4. 点击“恢复示例并关闭写入”，回到初始笔记和默认权限。已有记录保留，便于对照。
 
-## 三步演示
+![写入被拒绝：请求未执行，调用前后 SHA-256 相同](docs/images/request-denied.png)
 
-1. 点击“读取笔记”，再点击“尝试写入”。真实记录显示拒绝、实际执行为否，调用前后 SHA-256 相同。
-2. 开启“允许写入沙盒文件”开关，再点击“尝试写入”。显示允许，固定示例文件被写入，哈希改变。
-3. 点击“恢复示例并关闭写入”，恢复原笔记并重新禁止写入。
+点击表格里的工具名可以检查不同请求。当前页面发出的请求会临时保留载荷、响应和哈希；刷新后这些正文消失，历史日志只留下时间、工具、规则和执行结果。详情展示的是调用发生时的证据，不是文件此刻的内容。
 
-页面始终显示首次三步引导；按钮支持键盘焦点，开关可用空格切换。调用期间按钮禁用，断线或失败时显示中文提示；小屏可纵向阅读。计数只来自真实工具事件，最多保留最近 100 条。原始响应展开区保留协议字段名，读取内容是中文示例笔记。
+## 检查环境与运行测试
 
-`npm run mcp:demo` 可独立运行 SDK 客户端演示，验证读、拒绝、不变哈希、授权写入并在 finally 中恢复原文件。不要与其他测试或界面调用并行执行。
-
-## 检查、失败恢复与复用浏览器
-
-`npm run doctor` 无需第三方依赖即可启动；检查 Node、项目依赖、浏览器、录像组件和 4205/5205 端口。缺项时以中文提示修复命令并返回非零退出码，不要求无关 Key。请在 dev 停止时运行，运行中的本项目也会占用这两个端口。
-
-- **端口冲突**：停止占用 4205 或 5205 的旧服务（运行 dev 的终端按 Ctrl+C），再启动。本项目不自动关闭其他应用，不更改固定端口。
-- **依赖缺失或损坏**：重新运行 `npm ci --cache .npm-cache`；安装被中断可重复执行 setup。
-- **浏览器/录像组件缺失**：运行 `npm run browsers:install`。无需为了运行 UI 安装浏览器组件。
-- **连接中断**：确认 dev 两个服务都启动，访问健康检查地址；重启后刷新页面。
-- **写入失败**：确认仓库中的 `fixtures/sandbox/note.txt` 存在且可读写，不是符号链接。正常操作后可用恢复按钮回到默认状态。
-- **下载慢**：可只读复用兼容浏览器。默认浏览器目录为 `.playwright-browsers`；用 `PLAYWRIGHT_EXECUTABLE_PATH` 指向已有 Chromium，用 `PLAYWRIGHT_BROWSERS_PATH` 指向包含匹配 FFmpeg 的缓存目录。doctor 仅检查文件存在，实际兼容性由 E2E 验证。
-
-环境变量设置方式不同，路径由你按实际环境填写，不要直接复制占位路径：
+先停止 dev，再运行诊断，避免本项目自己占用端口：
 
 ```sh
-# macOS / Linux
-export PLAYWRIGHT_EXECUTABLE_PATH="/实际路径/chrome-headless-shell"
-# 可选：export PLAYWRIGHT_BROWSERS_PATH="/实际路径/浏览器缓存"
-npm run e2e
-```
-
-```powershell
-# Windows PowerShell
-$env:PLAYWRIGHT_EXECUTABLE_PATH = 'C:\实际路径\chrome-headless-shell.exe'
-# 可选：$env:PLAYWRIGHT_BROWSERS_PATH = 'C:\实际路径\浏览器缓存'
-npm run e2e
-```
-
-`.env.example` 仅作变量说明，项目不自动加载 `.env`。setup 总是安装到本项目目录；以上变量只影响 doctor 和测试复用。
-
-## 真实验证
-
-```sh
+npm run doctor
+npm run browsers:install
 npm run build
 npm run test
 npm run e2e
 npm run demo
 ```
 
-测试断言包括：官方 SDK 发现工具、真实读取、拒绝后文件哈希不变、额外路径字段被拒绝、授权写入、参数正文不进入日志、真实界面计数、中文状态、小屏无横向溢出、键盘焦点、失败提示持续可见。小屏失败反馈测试明确用 HTTP 故障注入，不冒充真实 MCP 调用。
+`doctor` 不依赖第三方包，检查 Node 版本、依赖、浏览器、录像组件和两个端口，缺项时给出中文修复命令。`browsers:install` 只在缺少测试浏览器时需要；运行界面无需安装它。
 
-本地证据保留在 `artifacts/logs/`、`artifacts/denied-write.png`、`artifacts/allowed-write.png`、`artifacts/zh-mobile-error.png` 和 `artifacts/playwright/`，具体结果见 `status.json`。录像、日志、缓存不进入 Git。旧版初次构建曾因 SDK 签名错误失败、E2E 曾因缺浏览器/FFmpeg 失败，失败日志均保留，修复后才记录通过。
+测试覆盖真实 SDK 读写、拒绝后文件不变、授权后文件改变、请求详情对应、API 参数校验、390px 无横向溢出、键盘焦点，以及加载、空记录和错误反馈。空记录与 HTTP 错误测试使用明确的模拟响应；读写演示使用真实工具。`npm run demo` 会重新拍摄 README 图片并生成录像。
 
-此次验收复用已有 Chromium，并使用项目内匹配 FFmpeg，未重复巨大下载。**全新环境完整 setup 下载、Windows 和 Linux 实机执行尚未验证**；脚本使用 Node 内置跨平台 API，不能替代这些平台的实测。
+`npm run mcp:demo` 可直接在终端运行同样的 SDK 流程。请勿与界面操作或其他测试同时执行。
 
-## 安全边界与限制
+如果环境已经有兼容 Chromium，可复用它：
 
-只开放 `read_project_note` 和 `write_project_note`，文件固定为 `fixtures/sandbox/note.txt`，写入最多 2,048 字符。拒绝发生在底层写入前，符号链接被拒绝；不提供任意路径、命令或网络工具。SDK 操作有八秒超时。API 拒绝非指定本地来源的请求。
+```sh
+# macOS / Linux：替换为实际可执行文件
+export PLAYWRIGHT_EXECUTABLE_PATH="/实际路径/chrome-headless-shell"
+npm run doctor
+npm run e2e
+```
 
-界面串行执行调用，调用中拒绝切换权限。外部 CLI、多进程并发没有跨进程锁，不能与 UI 或测试并行使用。日志是可修改的本地 JSON，非防篡改审计，最多 100 条。权限在重启后恢复默认拒绝，日志保留。恢复按钮是显式管理操作，不伪装为模型工具事件。
+```powershell
+# Windows PowerShell
+$env:PLAYWRIGHT_EXECUTABLE_PATH = 'C:\实际路径\chrome-headless-shell.exe'
+npm run doctor
+npm run e2e
+```
 
-这不是操作系统沙盒或身份认证系统，无法防御恶意本地进程和文件系统竞争攻击。不宣称使用 AI 或具备模型安全防护效果。
+默认浏览器缓存目录是 `.playwright-browsers`，也可设置 `PLAYWRIGHT_BROWSERS_PATH` 指向包含匹配 FFmpeg 的缓存。`.env.example` 仅说明变量，项目不会自动加载 `.env`。
 
-MIT 许可证原文见 LICENSE。
+端口冲突时停止原服务；依赖不完整时重新执行 `npm ci --cache .npm-cache`；连接失败时检查 [API 健康地址](http://127.0.0.1:5205/api/health)。文件操作失败时检查 `fixtures/sandbox/note.txt` 是否存在、可读写且不是符号链接。
+
+## 当前边界
+
+只提供 `read_project_note` 和 `write_project_note`，目标固定为 `fixtures/sandbox/note.txt`，写入最多 2,048 字符。不开放任意路径、命令行或网络工具，也不是通用 MCP 拦截器。权限检查发生在工具内部、文件操作之前。
+
+这是单用户本地演示。日志是可修改的 JSON，最多保留 100 条，没有跨进程锁或防篡改能力。服务重启后写入权限关闭，日志保留。它不是操作系统沙盒或身份认证系统，无法防御恶意本地进程及文件系统竞争攻击。
+
+本次在 macOS / Node 26.4 上验证，复用已有 Chromium 和项目内 FFmpeg。全新 setup 下载、Windows、Linux 和其他支持的 Node 版本尚未实机验证。
+
+## 项目结构
+
+React 负责界面，Vite 代理本地 API，Express 推送请求状态；官方 MCP client/server 运行 stdio 调用，Zod 校验参数。TypeScript / tsx 用于构建和执行，Vitest / Playwright 用于集成测试、浏览器测试和录像。精确版本见 `package-lock.json`。
+
+- `src/`：操作区、请求表和详情面板。
+- `server/`：API、MCP 工具与文件存储。
+- `scripts/`：安装和环境诊断。
+- `docs/images/`：实际应用截图，随仓库提交。
+- `artifacts/`：本地日志和录像，不提交 Git；验证记录见 `status.json`。
+
+许可证：[MIT](LICENSE)。

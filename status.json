@@ -1,60 +1,64 @@
 {
   "project": "mcp-firewall",
   "state": "PASS",
-  "scenario": "中文默认界面：官方 SDK 真实读取、拒绝写入且哈希不变、授权后真实写入并恢复；小屏、键盘焦点、中文失败反馈和 doctor 缺依赖诊断。",
+  "scenario": "浅色请求审查台：真实 SDK 调用、可选择的请求表、规则/载荷/哈希详情，桌面 1440×900 与手机 390px。",
   "checks": [
+    {
+      "id": "doctor",
+      "passed": true,
+      "evidence": "artifacts/logs/redesign-doctor.log"
+    },
     {
       "id": "build",
       "passed": true,
-      "evidence": "artifacts/logs/zh-build.log"
+      "evidence": "artifacts/logs/redesign-build.log"
     },
     {
-      "id": "integration-and-doctor-2-tests",
+      "id": "test",
       "passed": true,
-      "evidence": "artifacts/logs/zh-test.log"
+      "evidence": "artifacts/logs/redesign-test.log"
     },
     {
-      "id": "chinese-browser-3-tests",
+      "id": "e2e",
       "passed": true,
-      "evidence": "artifacts/logs/zh-e2e.log"
+      "evidence": "artifacts/logs/redesign-e2e.log"
     },
     {
-      "id": "chinese-demo",
+      "id": "demo",
       "passed": true,
-      "evidence": "artifacts/logs/zh-demo.log"
+      "evidence": "artifacts/logs/redesign-demo.log"
     },
     {
-      "id": "doctor-with-cached-browser",
+      "id": "desktop-overview",
       "passed": true,
-      "evidence": "artifacts/logs/zh-doctor.log"
+      "evidence": "docs/images/request-overview.png"
     },
     {
-      "id": "doctor-missing-dependency-isolated-root",
+      "id": "denied-write-detail",
       "passed": true,
-      "evidence": "artifacts/logs/zh-doctor-missing.log"
+      "evidence": "docs/images/request-denied.png"
     },
     {
-      "id": "doctor-detects-missing-browser-and-busy-ports",
-      "passed": true,
-      "evidence": "artifacts/logs/zh-doctor-default.log"
-    },
-    {
-      "id": "chinese-denied-hash",
-      "passed": true,
-      "evidence": "artifacts/denied-write.png"
-    },
-    {
-      "id": "chinese-allowed-hash",
-      "passed": true,
-      "evidence": "artifacts/allowed-write.png"
-    },
-    {
-      "id": "mobile-error-feedback",
+      "id": "mobile-error",
       "passed": true,
       "evidence": "artifacts/zh-mobile-error.png"
+    },
+    {
+      "id": "loading",
+      "passed": true,
+      "evidence": "artifacts/loading-state.png"
+    },
+    {
+      "id": "empty-state",
+      "passed": true,
+      "evidence": "artifacts/empty-state.png"
     }
   ],
   "commands": [
+    {
+      "cmd": "npm run doctor",
+      "exitCode": 0
+    },
     {
       "cmd": "npm run build",
       "exitCode": 0
@@ -64,27 +68,11 @@
       "exitCode": 0
     },
     {
-      "cmd": "npm run e2e（通过 PLAYWRIGHT_EXECUTABLE_PATH 复用 Chromium）",
+      "cmd": "npm run e2e",
       "exitCode": 0
     },
     {
-      "cmd": "npm run demo（通过 PLAYWRIGHT_EXECUTABLE_PATH 复用 Chromium）",
-      "exitCode": 0
-    },
-    {
-      "cmd": "npm run doctor（默认浏览器缺失，测试期间端口占用，正确诊断）",
-      "exitCode": 1
-    },
-    {
-      "cmd": "npm run doctor（复用 Chromium，测试结束后）",
-      "exitCode": 0
-    },
-    {
-      "cmd": "npm run mcp:demo",
-      "exitCode": 0
-    },
-    {
-      "cmd": "node --check scripts/setup.mjs && node --check scripts/doctor.mjs",
+      "cmd": "npm run demo",
       "exitCode": 0
     }
   ],
@@ -96,7 +84,23 @@
     "setup 已实现跨平台命令，语法检查通过；未执行全新环境完整依赖安装和浏览器下载，避免重复巨大下载。",
     "本次在 macOS、Node 26.4.0 实测；Windows、Linux 和其他受支持 Node 版本未实机验证。",
     "浏览器验收只读复用已有 Chromium，录像使用项目内匹配 FFmpeg；默认缓存缺少 Chromium，doctor 会给出安装/复用指引。",
-    "单用户可变日志最多 100 条，无跨进程锁或防篡改能力；不是操作系统沙盒或身份认证。",
-    "小屏失败反馈测试使用明确的 HTTP 故障注入；核心工具调用测试均使用真实官方 SDK。"
+    "单用户可变日志最多 100 条，无跨进程锁或防篡改能力；不是操作系统沙盒或身份认证。"
+  ],
+  "testResults": {
+    "integration": 2,
+    "browser": 5,
+    "demo": 1
+  },
+  "designChanges": [
+    "冷灰浅色纸面，细分隔线与紧凑请求表替代暗色卡片及宣传标题。",
+    "操作、审计记录、选中请求详情分区；规则、载荷与哈希随选中请求切换。",
+    "当前页面临时保存请求详情，历史记录明确显示正文和哈希未保存。",
+    "README 使用实际运行截图，图片提交至 docs/images。"
+  ],
+  "verificationNotes": [
+    "首次新版 E2E 因中文规则映射缺失失败，补齐映射后全部通过。",
+    "图像已人工查看：桌面全景、拒绝详情、手机错误和加载状态；最终桌面截图 1440×900。",
+    "doctor、E2E、demo 使用 PLAYWRIGHT_EXECUTABLE_PATH 复用已有 Chromium；FFmpeg 为项目内缓存。",
+    "模拟空记录、离线、HTTP 延迟及错误只用于状态测试；主流程使用真实 MCP 工具。"
   ]
 }
