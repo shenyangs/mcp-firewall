@@ -7,19 +7,19 @@ test("real MCP policy gate: denied hash, permission flip, allowed mutation", asy
   const baseline = await (await request.get("/api/state")).json();
   await page.goto("/");
   try {
-    await page.getByRole("button", { name: "Read note", exact: true }).click();
+    await page.getByRole("button", { name: "读取笔记", exact: true }).click();
     await expect(page.locator(".event").first()).toContainText(
       "read_project_note",
     );
     await expect(page.locator(".event").first()).toContainText(
-      "executed: true",
+      "实际执行：是",
     );
-    await page.getByRole("button", { name: "Attempt write" }).click();
-    await expect(page.locator(".event").first()).toContainText("Denied");
+    await page.getByRole("button", { name: "尝试写入" }).click();
+    await expect(page.locator(".event").first()).toContainText("拒绝");
     await expect(page.locator(".event").first()).toContainText(
-      "executed: false",
+      "实际执行：否",
     );
-    await expect(page.getByTestId("integrity")).toHaveText("UNCHANGED");
+    await expect(page.getByTestId("integrity")).toHaveText("未改变");
     await page.screenshot({
       path: "artifacts/denied-write.png",
       fullPage: true,
@@ -29,9 +29,9 @@ test("real MCP policy gate: denied hash, permission flip, allowed mutation", asy
       "aria-checked",
       "true",
     );
-    await page.getByRole("button", { name: "Attempt write" }).click();
-    await expect(page.locator(".event").first()).toContainText("Allowed");
-    await expect(page.getByTestId("integrity")).toHaveText("CHANGED");
+    await page.getByRole("button", { name: "尝试写入" }).click();
+    await expect(page.locator(".event").first()).toContainText("允许");
+    await expect(page.getByTestId("integrity")).toHaveText("已改变");
     await expect(page.locator(".stats strong").first()).toHaveText(
       String(
         baseline.events
@@ -53,7 +53,7 @@ test("real MCP policy gate: denied hash, permission flip, allowed mutation", asy
       fullPage: true,
     });
     await page
-      .getByRole("button", { name: "Restore fixture & lock policy" })
+      .getByRole("button", { name: "恢复示例并关闭写入" })
       .click();
     await expect(page.getByRole("switch")).toHaveAttribute(
       "aria-checked",

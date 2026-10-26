@@ -1,57 +1,60 @@
 {
   "project": "mcp-firewall",
   "state": "PASS",
-  "scenario": "Official MCP SDK stdio client reads fixture, denied write preserves SHA-256, policy override permits write, fixture restored; React displays actual events.",
+  "scenario": "中文默认界面：官方 SDK 真实读取、拒绝写入且哈希不变、授权后真实写入并恢复；小屏、键盘焦点、中文失败反馈和 doctor 缺依赖诊断。",
   "checks": [
     {
       "id": "build",
       "passed": true,
-      "evidence": "artifacts/logs/build.log"
+      "evidence": "artifacts/logs/zh-build.log"
     },
     {
-      "id": "mcp-integration",
+      "id": "integration-and-doctor-2-tests",
       "passed": true,
-      "evidence": "artifacts/logs/test.log"
+      "evidence": "artifacts/logs/zh-test.log"
     },
     {
-      "id": "browser-e2e-2-tests",
+      "id": "chinese-browser-3-tests",
       "passed": true,
-      "evidence": "artifacts/logs/e2e.log"
+      "evidence": "artifacts/logs/zh-e2e.log"
     },
     {
-      "id": "demo-recording",
+      "id": "chinese-demo",
       "passed": true,
-      "evidence": "artifacts/playwright/demo-real-MCP-policy-gate--7b124-ssion-flip-allowed-mutation/video.webm"
+      "evidence": "artifacts/logs/zh-demo.log"
     },
     {
-      "id": "denied-hash-unchanged",
+      "id": "doctor-with-cached-browser",
+      "passed": true,
+      "evidence": "artifacts/logs/zh-doctor.log"
+    },
+    {
+      "id": "doctor-missing-dependency-isolated-root",
+      "passed": true,
+      "evidence": "artifacts/logs/zh-doctor-missing.log"
+    },
+    {
+      "id": "doctor-detects-missing-browser-and-busy-ports",
+      "passed": true,
+      "evidence": "artifacts/logs/zh-doctor-default.log"
+    },
+    {
+      "id": "chinese-denied-hash",
       "passed": true,
       "evidence": "artifacts/denied-write.png"
     },
     {
-      "id": "allowed-write-changed",
+      "id": "chinese-allowed-hash",
       "passed": true,
       "evidence": "artifacts/allowed-write.png"
     },
     {
-      "id": "standalone-sdk-client",
+      "id": "mobile-error-feedback",
       "passed": true,
-      "evidence": "artifacts/logs/mcp-demo.log"
+      "evidence": "artifacts/zh-mobile-error.png"
     }
   ],
   "commands": [
-    {
-      "cmd": "npm run build (initial SDK signature error; corrected)",
-      "exitCode": 2
-    },
-    {
-      "cmd": "npm run e2e (initial missing browser / FFmpeg; resolved)",
-      "exitCode": 1
-    },
-    {
-      "cmd": "npm run browsers:install (optional full-browser download stopped; cached executable used)",
-      "exitCode": 143
-    },
     {
       "cmd": "npm run build",
       "exitCode": 0
@@ -61,15 +64,27 @@
       "exitCode": 0
     },
     {
-      "cmd": "npm run e2e (PLAYWRIGHT_EXECUTABLE_PATH set to existing compatible Chromium)",
+      "cmd": "npm run e2e（通过 PLAYWRIGHT_EXECUTABLE_PATH 复用 Chromium）",
       "exitCode": 0
     },
     {
-      "cmd": "npm run demo (PLAYWRIGHT_EXECUTABLE_PATH set to existing compatible Chromium)",
+      "cmd": "npm run demo（通过 PLAYWRIGHT_EXECUTABLE_PATH 复用 Chromium）",
+      "exitCode": 0
+    },
+    {
+      "cmd": "npm run doctor（默认浏览器缺失，测试期间端口占用，正确诊断）",
+      "exitCode": 1
+    },
+    {
+      "cmd": "npm run doctor（复用 Chromium，测试结束后）",
       "exitCode": 0
     },
     {
       "cmd": "npm run mcp:demo",
+      "exitCode": 0
+    },
+    {
+      "cmd": "node --check scripts/setup.mjs && node --check scripts/doctor.mjs",
       "exitCode": 0
     }
   ],
@@ -77,10 +92,11 @@
   "fixturesUsed": true,
   "demoVideo": "artifacts/playwright/demo-real-MCP-policy-gate--7b124-ssion-flip-allowed-mutation/video.webm",
   "limitations": [
-    "Controlled two-tool gateway, not a universal MCP interceptor.",
-    "No inference: real deterministic enforcement on explicitly labelled fixture data.",
-    "Single-operator mutable audit; last 100 events; no cross-process locking or tamper resistance.",
-    "Browser verification reused an existing Chromium executable read-only and downloaded matching FFmpeg into project cache. Fresh-clone headless browser installation was not verified; an earlier slow full-browser download was stopped.",
-    "No OS sandbox or authentication; hostile local processes and filesystem races are out of scope."
+    "固定两工具网关，不是通用 MCP 拦截器；示例数据、真实规则执行，无模型推理。",
+    "setup 已实现跨平台命令，语法检查通过；未执行全新环境完整依赖安装和浏览器下载，避免重复巨大下载。",
+    "本次在 macOS、Node 26.4.0 实测；Windows、Linux 和其他受支持 Node 版本未实机验证。",
+    "浏览器验收只读复用已有 Chromium，录像使用项目内匹配 FFmpeg；默认缓存缺少 Chromium，doctor 会给出安装/复用指引。",
+    "单用户可变日志最多 100 条，无跨进程锁或防篡改能力；不是操作系统沙盒或身份认证。",
+    "小屏失败反馈测试使用明确的 HTTP 故障注入；核心工具调用测试均使用真实官方 SDK。"
   ]
 }

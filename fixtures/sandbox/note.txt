@@ -1,2 +1,2 @@
-Project Atlas — fixture note.
-Release requires human review.
+Project Atlas — 示例笔记（fixture）。
+发布需要人工复核。

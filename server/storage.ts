@@ -10,11 +10,11 @@ import { createHash } from "node:crypto";
 export const root = fileURLToPath(new URL("../", import.meta.url));
 export const note = root + "fixtures/sandbox/note.txt";
 export const initial =
-  "Project Atlas — fixture note.\nRelease requires human review.\n";
+  "Project Atlas — 示例笔记（fixture）。\n发布需要人工复核。\n";
 export function safe() {
   for (const p of ["fixtures", "fixtures/sandbox", "fixtures/sandbox/note.txt"])
     if (lstatSync(root + p).isSymbolicLink())
-      throw new Error("Symlink refused");
+      throw new Error("拒绝访问符号链接");
 }
 export function readNote() {
   safe();

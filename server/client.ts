@@ -27,7 +27,7 @@ export async function invoke(
   try {
     const catalog = await client.listTools({}, { timeout: 8000 });
     if (!catalog.tools.some((t) => t.name === tool))
-      throw new Error("Unknown tool");
+      throw new Error("未知工具");
     return await client.callTool(
       { name: tool, arguments: tool === "write_project_note" ? { text } : {} },
       { timeout: 8000 },

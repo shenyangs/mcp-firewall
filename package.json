@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
   },
   "scripts": {
     "dev": "concurrently -k -n web,api \"npm:dev:web\" \"npm:dev:api\"",
@@ -15,8 +15,10 @@
     "e2e": "playwright test",
     "demo": "playwright test tests/demo.spec.ts",
     "check": "npm run build && npm run test && npm run e2e",
-    "browsers:install": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright install chromium --only-shell",
-    "mcp:demo": "tsx server/demo-client.ts"
+    "browsers:install": "node scripts/setup.mjs --browsers-only",
+    "mcp:demo": "tsx server/demo-client.ts",
+    "setup": "node scripts/setup.mjs",
+    "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {
     "react": "19.3.1",

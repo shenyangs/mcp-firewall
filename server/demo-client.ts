@@ -9,17 +9,18 @@ try {
   const denied = await invoke(
     "write_project_note",
     false,
-    "CLI fixture update",
+    "命令行示例更新",
   );
   assert(denied.isError);
   assert.equal(hash(), before);
   const allowed = await invoke(
     "write_project_note",
     true,
-    "CLI fixture update",
+    "命令行示例更新",
   );
   assert(!allowed.isError);
   assert.notEqual(hash(), before);
+  console.log("验证通过：真实读取、拒绝且文件未改变、授权写入；示例文件将在退出前恢复。无需模型或 API Key。");
   console.log(
     JSON.stringify({
       read: true,

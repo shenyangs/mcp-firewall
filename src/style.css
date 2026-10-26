@@ -350,3 +350,20 @@ footer {
   .proof { margin-top: 12px; padding: 13px; }
   footer { padding: 16px 0; }
 }
+.guide { color: #b7c7d2; font-size: 12px; line-height: 1.8; padding-top: 10px; }
+button:focus-visible, summary:focus-visible { outline: 3px solid #b5ed8c; outline-offset: 4px; }
+.event > div { min-width: 0; overflow-wrap: anywhere; }
+@media (min-width: 901px) { .hero { padding-top: 18px; padding-bottom: 12px; } h1 { font-size: 39px; } .activity { height: 165px; } }
+@media (max-width: 600px) { header { flex-wrap: wrap; gap: 10px; } .hero { flex-direction: column; align-items: flex-start; gap: 10px; } .stats { width: 100%; } .stats strong { font-size: 35px; } .stats small { align-self: end; } .pipeline { gap: 8px; letter-spacing: 0; padding: 12px; } .grid { grid-template-columns: minmax(0, 1fr); } aside,article { min-width: 0; } .event { gap: 8px; } .event time { display: none; } .hash code { min-width: 0; } .tag { letter-spacing: 0; } footer { flex-direction: column; } .activity { height: 235px; } .toggle { min-width: 44px; min-height: 28px; } .restore { min-height: 36px; } }
+@media (max-width: 900px) {
+  header { flex-wrap: wrap; }
+  .fixture { display: block; width: 100%; margin-left: 0; line-height: 1.6; }
+  .pipeline { flex-wrap: wrap; }
+  .pipeline .right { display: block; width: 100%; margin-left: 0; line-height: 1.6; }
+}
+@media (min-width: 901px) {
+  .hero { padding-top: 12px; padding-bottom: 8px; }
+  h1 { margin-top: 8px; margin-bottom: 8px; }
+  .policy { padding-top: 10px; padding-bottom: 10px; }
+  footer { padding-top: 10px; padding-bottom: 8px; }
+}

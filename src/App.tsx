@@ -20,6 +20,7 @@ export default function App() {
     events: [],
     hash: "",
   });
+  const [connected, setConnected] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [proof, setProof] = useState<{
@@ -31,9 +32,9 @@ export default function App() {
     const stream = new EventSource("/api/events");
     stream.onmessage = (e) => {
       setState(JSON.parse(e.data));
-      setError("");
+      setConnected(true);
     };
-    stream.onerror = () => setError("Connection interrupted. Reconnecting…");
+    stream.onerror = () => setConnected(false);
     return () => stream.close();
   }, []);
   async function action(path: string, body = {}) {
@@ -50,32 +51,32 @@ export default function App() {
       if (path === "invoke") setProof(result);
       if (path === "restore") setProof(null);
     } catch (e) {
-      setError(String(e));
+      setError(e instanceof Error && /[\u4e00-\u9fff]/.test(e.message) ? e.message : "请求失败，请检查本地服务后重试。");
     } finally {
       setBusy(false);
     }
   }
   return (
-    <main>
+    <main aria-busy={busy}>
       <header>
         <a className="brand">
           <ShieldCheck /> MCP <b>FIREWALL</b>
         </a>
-        <span className="tag">LOCAL STDIO · SDK v2</span>
-        <span className="fixture">FIXTURE DATA / REAL TOOL EXECUTION</span>
+        <span className="tag">本地 STDIO · SDK v2</span>
+        <span className="fixture">示例数据（fixture）／真实工具执行</span>
       </header>
       <section className="hero">
         <div>
-          <div className="eyebrow">TRUST IS A POLICY. NOT A PROMPT.</div>
+          <div className="eyebrow">让权限规则先于工具执行</div>
           <h1>
-            Before the tool runs,
+            工具执行之前，
             <br />
-            <em>draw the line.</em>
+            <em>守住权限边界。</em>
           </h1>
           <p>
-            A controlled two-tool gateway. Every request meets a policy.
+            两个受控工具，每次请求都经过权限检查。
             <br />
-            Every decision leaves evidence.
+            每个决定，都有真实证据。
           </p>
         </div>
         <div className="stats">
@@ -83,50 +84,52 @@ export default function App() {
             <strong>
               {state.events.filter((e) => e.decision === "Allowed").length}
             </strong>
-            <span>Allowed</span>
+            <span>已允许</span>
           </div>
           <div>
             <strong className="red">
               {state.events.filter((e) => e.decision === "Denied").length}
             </strong>
-            <span>Denied</span>
+            <span>已拒绝</span>
           </div>
-          <small>Actual invocations · last 100 retained</small>
+          <small>真实调用 · 仅保留最近 100 条</small>
         </div>
       </section>
       <div className="pipeline">
-        <span>01 &nbsp; SDK CLIENT</span>
+        <span>01 &nbsp; SDK 客户端</span>
         <ArrowRight size={16} />
-        <span className="accent">02 &nbsp; POLICY GATE</span>
+        <span className="accent">02 &nbsp; 权限检查</span>
         <ArrowRight size={16} />
-        <span>03 &nbsp; SANDBOX FILE</span>
+        <span>03 &nbsp; 沙盒文件</span>
         <span className="right">
-          No model inference · deterministic enforcement
+          无模型推理 · 按明确规则执行
         </span>
       </div>
+      <div className="guide" aria-label="首次使用三步引导">① 读取笔记，再尝试写入，确认被拒绝　② 开启写入权限，再试一次　③ 恢复示例并关闭写入</div>
+      {!connected && <p role="status">正在连接本地服务；若持续等待，请运行 npm run doctor 检查后重启服务。</p>}
       <section className="grid">
         <aside>
           <div className="section-title">
-            <LockKeyhole size={17} /> Policy controls
+            <LockKeyhole size={17} /> 权限设置
           </div>
           <div className="policy">
             <div>
-              <b>Read project note</b>
-              <small>Fixed sandbox path only</small>
+              <b>读取项目笔记</b>
+              <small>仅限固定沙盒文件</small>
             </div>
-            <span className="badge allowed">ALLOW</span>
+            <span className="badge allowed">允许</span>
           </div>
           <div className="policy">
             <div>
-              <b>Write project note</b>
-              <small>Default deny · explicit override</small>
+              <b>写入项目笔记</b>
+              <small>默认拒绝 · 需手动开启</small>
             </div>
             <button
               role="switch"
-              aria-label="Allow sandbox writes"
+              aria-label="允许写入沙盒文件"
               aria-checked={state.allowWrites}
               className={"toggle " + (state.allowWrites ? "on" : "")}
-              disabled={busy}
+              disabled={busy || !connected}
               onClick={() =>
                 action("policy", { allowWrites: !state.allowWrites })
               }
@@ -135,59 +138,59 @@ export default function App() {
             </button>
           </div>
           <p className="boundary">
-            Scope: fixtures/sandbox/note.txt
+            范围： fixtures/sandbox/note.txt
             <br />
-            No arbitrary paths. No shell. No network tools.
+            不开放任意路径、命令行或网络工具。
           </p>
           <div className="section-title">
-            <FileText size={17} /> Invoke via MCP client
+            <FileText size={17} /> 通过 MCP 客户端调用
           </div>
           <button
             className="action"
-            disabled={busy}
+            disabled={busy || !connected}
             onClick={() => action("invoke", { tool: "read_project_note" })}
           >
-            Read note <ArrowRight size={16} />
+            读取笔记 <ArrowRight size={16} />
           </button>
           <button
             className="action primary"
-            disabled={busy}
+            disabled={busy || !connected}
             onClick={() => action("invoke", { tool: "write_project_note" })}
           >
-            Attempt write <ArrowRight size={16} />
+            尝试写入 <ArrowRight size={16} />
           </button>
           <button
             className="restore"
-            disabled={busy}
+            disabled={busy || !connected}
             onClick={() => action("restore")}
           >
-            Restore fixture & lock policy
+            恢复示例并关闭写入
           </button>
-          {busy && <p role="status">Waiting for MCP response…</p>}
+          {busy && <p role="status">正在等待 MCP 响应，请稍候…</p>}
           {error && <p role="alert">{error}</p>}
         </aside>
         <article>
           <div className="section-title">
-            <Activity size={17} /> Request activity{" "}
-            <span className="tag right">ARGUMENTS REDACTED</span>
+            <Activity size={17} /> 真实调用记录{" "}
+            <span className="tag right">参数正文不记录</span>
           </div>
           <div className="activity">
             {state.events.length === 0 ? (
               <div className="empty">
-                No requests yet.
+                还没有调用记录。
                 <br />
-                <small>Invoke a tool to see its real policy decision.</small>
+                <small>点击“读取笔记”，查看真实的权限检查结果。</small>
               </div>
             ) : (
               [...state.events].reverse().map((e, i) => (
                 <div className="event" key={e.timestamp + i}>
                   <span className={"badge " + e.decision.toLowerCase()}>
-                    {e.decision}
+                    {e.decision === "Allowed" ? "允许" : "拒绝"}
                   </span>
                   <div>
                     <b>{e.tool}</b>
                     <small>
-                      {e.reason} · executed: {String(e.executed)}
+                      {({"Read-only tool permitted":"只读工具已允许","Default-deny write policy":"默认拒绝写入","Explicit permission for fixture sandbox":"已明确授权示例沙盒"} as Record<string,string>)[e.reason] ?? e.reason} · 实际执行：{e.executed ? "是" : "否"}
                     </small>
                   </div>
                   <time>{e.timestamp.slice(11, 19)}</time>
@@ -197,7 +200,7 @@ export default function App() {
           </div>
           <div className="proof">
             <div className="section-title">
-              FILE INTEGRITY{" "}
+              文件完整性{" "}
               <span
                 data-testid="integrity"
                 className={
@@ -206,22 +209,22 @@ export default function App() {
               >
                 {proof
                   ? proof.before === proof.after
-                    ? "UNCHANGED"
-                    : "CHANGED"
-                  : "AWAITING INVOCATION"}
+                    ? "未改变"
+                    : "已改变"
+                  : "等待调用"}
               </span>
             </div>
             <div className="hash">
-              <span>BEFORE</span>
+              <span>调用前</span>
               <code>{proof?.before ?? state.hash}</code>
             </div>
             <div className="hash">
-              <span>AFTER</span>
+              <span>调用后</span>
               <code>{proof?.after ?? "—"}</code>
             </div>
             {proof && (
               <details>
-                <summary>Inspect MCP response</summary>
+                <summary>查看 MCP 原始响应</summary>
                 <pre>{JSON.stringify(proof.result, null, 2)}</pre>
               </details>
             )}
@@ -230,9 +233,9 @@ export default function App() {
       </section>
       <footer>
         <span>
-          Enforcement happens inside the tool handler, before file access.
+          在工具处理器内部检查权限，先检查再执行文件操作。
         </span>
-        <span>CONTROLLED DEMO · NOT A UNIVERSAL MCP INTERCEPTOR</span>
+        <span>受控演示 · 不是通用 MCP 拦截器</span>
       </footer>
     </main>
   );
